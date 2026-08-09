@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>大理+西昌返程 7天 · 5大1小（昆明出发 → 大理 → 西昌 → 荣昌）</title>
+<meta name="description" content="全家5大1小（15个月婴儿）+7座车：8/10上午昆明→大理，大理玩3天半（洱海西线/苍山/双廊），8/13经攀枝花→西昌→乐山返程，不走回头路，8/16（周日）抵荣昌。含带娃纪律、停车、预算明细，全家约7,000元。">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+/* ═══════════════════════════════════════════
+   Design System — 基于官方 trip-map-builder 模板（Apple 风）
+   ═══════════════════════════════════════════ */
+:root {
+  --bg-primary:    #ffffff;
+  --bg-secondary:  #f5f5f7;
+  --bg-tertiary:   #fbfbfd;
+  --bg-grouped:    #f2f2f7;
+  --bg-elevated:   #ffffff;
+  --text-primary:   #1d1d1f;
+  --text-secondary: #86868b;
+  --text-tertiary:  #aeaeb2;
+  --accent:        #0f766e;
+  --accent-hover:  #115e59;
+  --tint-red:    #ff3b30;
+  --tint-orange: #ff9500;
+  --tint-green:  #34c759;
+  --tint-blue:   #007aff;
+  --tint-purple: #af52de;
+  --tint-pink:   #ff2d55;
+  --separator:  rgba(60, 60, 67, .12);
+  --shadow-sm:  0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:  0 4px 14px rgba(0,0,0,.08);
+  --shadow-lg:  0 8px 30px rgba(0,0,0,.12);
+  --radius-sm:  8px;
+  --radius-md:  12px;
+  --radius-lg:  16px;
+  --radius-xl:  20px;
+  --safe-top:    env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+               "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", "Arial", sans-serif;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.47059;
+  letter-spacing: -0.022em;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Map ── */
+#map { width: 100%; height: 40vh; min-height: 280px; position: sticky; top: 0; z-index: 100; }
+.locate-btn {
+  width: 36px; height: 36px; border-radius: 8px;
+  background: rgba(255,255,255,.92); backdrop-filter: blur(8px);
+  border: none; box-shadow: 0 1px 4px rgba(0,0,0,.18);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.locate-btn.active { color: #007aff; }
+@keyframes loc-pulse {
+  0%   { transform: scale(1); opacity: .55; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+.loc-pulse {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: rgba(0,122,255,.25);
+  animation: loc-pulse 1.6s ease-out infinite;
+}
+
+/* ── Tabs ── */
+.tabs {
+  display: flex; gap: 6px; padding: 12px 16px; overflow-x: auto; -webkit-overflow-scrolling: touch;
+  background: rgba(255,255,255,.85); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px); position: sticky; top: 40vh; z-index: 99;
+  border-bottom: .5px solid var(--separator); scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex-shrink: 0; padding: 7px 16px; border-radius: 980px; border: none;
+  background: var(--bg-grouped); color: var(--text-secondary);
+  font-size: 14px; font-weight: 500; cursor: pointer; transition: all .25s ease;
+  white-space: nowrap; letter-spacing: -0.01em;
+}
+.tab:active { transform: scale(.96); }
+.tab.active { background: var(--accent); color: #fff; }
+
+/* ── Main content ── */
+.content { max-width: 680px; margin: 0 auto; padding: 16px 16px calc(24px + var(--safe-bottom)); }
+
+/* ── Overview ── */
+.hero { text-align: center; padding: 28px 20px 20px; }
+.hero h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; }
+.hero .subtitle { font-size: 17px; color: var(--text-secondary); margin-top: 6px; font-weight: 400; }
+
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.info-card { background: var(--bg-elevated); border-radius: var(--radius-lg); padding: 16px; box-shadow: var(--shadow-sm); }
+.info-card .label { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .02em; margin-bottom: 6px; }
+.info-card .value { font-size: 15px; font-weight: 600; line-height: 1.4; }
+
+/* ── Section headers ── */
+.section-head { font-size: 13px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .03em; padding: 20px 0 8px; }
+
+/* ── Day header ── */
+.day-head { padding: 20px 0 12px; }
+.day-head h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+.day-head p { font-size: 15px; color: var(--text-secondary); margin-top: 2px; }
+
+/* ── Route bar ── */
+.route-bar { background: var(--bg-elevated); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 14px; box-shadow: var(--shadow-sm); font-size: 13px; color: var(--text-secondary); line-height: 1.7; white-space: pre-line; }
+.route-bar strong { color: var(--text-primary); }
+
+/* ── Timeline ── */
+.timeline { position: relative; padding-left: 24px; }
+.timeline::before { content: ''; position: absolute; left: 7px; top: 20px; bottom: 20px; width: 1.5px; background: var(--separator); }
+.tl-item { position: relative; margin-bottom: 10px; }
+.tl-dot { position: absolute; left: -20px; top: 18px; width: 10px; height: 10px; border-radius: 50%; z-index: 1; box-shadow: 0 0 0 3px var(--bg-secondary); }
+.tl-dot.food    { background: var(--tint-red); }
+.tl-dot.spot    { background: var(--tint-blue); }
+.tl-dot.hotel   { background: var(--tint-orange); }
+.tl-dot.drink   { background: var(--tint-purple); }
+.tl-dot.transport { background: var(--text-tertiary); }
+
+/* ── Card ── */
+.card { background: var(--bg-elevated); border-radius: var(--radius-md); padding: 14px 16px; box-shadow: var(--shadow-sm); transition: box-shadow .25s ease; cursor: pointer; }
+.card:active { box-shadow: var(--shadow-md); }
+.card .time { font-size: 12px; font-weight: 600; color: var(--text-tertiary); letter-spacing: .01em; }
+.card .name { font-size: 17px; font-weight: 600; margin: 2px 0 4px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 6px; }
+.card .desc { font-size: 14px; color: var(--text-secondary); line-height: 1.45; }
+
+/* Badge */
+.badge { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; }
+.badge.food   { background: rgba(255,59,48,.1);  color: var(--tint-red); }
+.badge.spot   { background: rgba(0,122,255,.1);  color: var(--tint-blue); }
+.badge.drink  { background: rgba(175,82,222,.1); color: var(--tint-purple); }
+
+/* Budget */
+.budget { display: inline-block; margin-top: 6px; padding: 3px 10px; background: var(--bg-grouped); border-radius: var(--radius-sm); font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+
+/* Payment */
+.pays { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+.pay { font-size: 11px; padding: 2px 7px; border-radius: 4px; font-weight: 600; }
+.pay.ok  { background: rgba(52,199,89,.1);  color: var(--tint-green); }
+.pay.no  { background: rgba(255,59,48,.08); color: var(--tint-red); }
+.pay.idk { background: rgba(255,149,0,.1);  color: var(--tint-orange); }
+
+/* Links row */
+.links { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 8px 14px; border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 600; border: none; cursor: pointer;
+  text-decoration: none !important; transition: filter .2s;
+}
+.btn:active { filter: brightness(.9); }
+.btn.nav    { background: var(--accent); color: #fff; }
+.btn.xhs    { background: #ff2442; color: #fff; }
+.btn.dp     { background: #ffa700; color: #fff; }
+.btn.rsv    { background: var(--tint-green); color: #fff; }
+
+/* Action Sheet */
+.as-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,.35); backdrop-filter: blur(2px);
+  display: flex; align-items: flex-end; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity .25s;
+}
+.as-overlay.show { opacity: 1; pointer-events: auto; }
+.as-sheet {
+  width: 100%; max-width: 420px;
+  padding: 0 8px 34px;
+  transform: translateY(100%); transition: transform .3s cubic-bezier(.22,1,.36,1);
+}
+.as-overlay.show .as-sheet { transform: translateY(0); }
+.as-group {
+  background: rgba(255,255,255,.88); backdrop-filter: blur(20px);
+  border-radius: 14px; overflow: hidden; margin-bottom: 8px;
+}
+.as-group .as-item {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 16px; font-size: 18px; color: #007aff; font-weight: 500;
+  border: none; background: none; width: 100%; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.as-group .as-item + .as-item { border-top: .5px solid rgba(0,0,0,.12); }
+.as-group .as-item:active { background: rgba(0,0,0,.06); }
+.as-cancel { font-weight: 600; }
+
+/* Details — default open */
+.details {
+  margin-top: 10px; padding-top: 10px;
+  border-top: .5px solid var(--separator);
+  font-size: 13px; color: var(--text-secondary); line-height: 1.6;
+}
+.details.closed { display: none; }
+
+/* ── Overview day list ── */
+.day-list .card { margin-bottom: 8px; }
+.day-list .card .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+
+/* ── Payment summary ── */
+.pay-summary { background: var(--bg-elevated); border-radius: var(--radius-md); padding: 14px 16px; box-shadow: var(--shadow-sm); font-size: 13px; line-height: 1.7; margin-bottom: 10px; }
+.pay-summary h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.pay-summary .warn { color: var(--tint-red); }
+.pay-summary .ok-text { color: var(--tint-green); }
+
+/* ── Budget table ── */
+.budget-table { width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 13px; }
+.budget-table th, .budget-table td { text-align: left; padding: 8px 6px; border-bottom: .5px solid var(--separator); vertical-align: top; line-height: 1.55; }
+.budget-table th { font-size: 12px; color: var(--text-secondary); font-weight: 600; }
+.budget-table td.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.budget-table tr.total td { font-weight: 700; border-top: 1.5px solid var(--separator); border-bottom: none; }
+
+/* ── Notes ── */
+.notes { background: var(--bg-elevated); border-radius: var(--radius-md); padding: 14px 16px 14px 30px; box-shadow: var(--shadow-sm); font-size: 13px; line-height: 1.7; margin-bottom: 10px; }
+.notes li { margin: 5px 0; }
+
+/* ── Legend ── */
+.legend { display: flex; gap: 14px; flex-wrap: wrap; padding: 8px 0; font-size: 12px; color: var(--text-secondary); }
+.legend-item { display: flex; align-items: center; gap: 5px; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* ── Leaflet overrides ── */
+.leaflet-popup-content-wrapper { border-radius: var(--radius-md) !important; box-shadow: var(--shadow-lg) !important; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", sans-serif !important; }
+.leaflet-popup-content { font-size: 14px !important; line-height: 1.5 !important; margin: 12px 14px !important; }
+.leaflet-popup-content a { color: var(--accent) !important; }
+.leaflet-popup-tip { background: #fff !important; }
+.leaflet-control-zoom a { width: 34px !important; height: 34px !important; line-height: 34px !important; font-size: 16px !important; border-radius: 10px !important; background: rgba(255,255,255,.85) !important; -webkit-backdrop-filter: blur(10px) !important; backdrop-filter: blur(10px) !important; border: .5px solid var(--separator) !important; color: var(--text-primary) !important; }
+.leaflet-control-zoom { border-radius: 12px !important; overflow: hidden; box-shadow: var(--shadow-md) !important; border: none !important; }
+.leaflet-control-attribution { font-size: 9px !important; opacity: .5; }
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+<div class="tabs" id="tabs"></div>
+<div class="content" id="content"></div>
+
+<script>
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  DATA — 行程数据（2026-08-08 → 2026-08-15，8天7晚）          ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+const HOTEL = { name: "大理古城·民宿（连住3晚）", lat: 25.7, lng: 100.17 };
+
+const DAYS = [
+  { id: 0, label: '总览', color: '#0f766e', locations: [] },
+  {
+    id: 1, label: 'D1 周一', date: '8月10日 · 昆明→大理', title: '320km 抵大理 · 古城漫步', color: '#0f766e',
+    locations: [
+      { name: "昆明出发", lat: 24.980, lng: 102.680, type: 'transport', time: '08:00', desc: "G56杭瑞高速 · 约320km 纯开4h", budget: "油费/过路费见总览", detail: "满油出发；楚雄服务区休息1次；11:30-12:00 抵大理。", gmap: "昆明 云南" },
+      { name: "大理民宿（古城内/才村）", lat: 25.700, lng: 100.170, type: 'hotel', time: '12:00', desc: "3居室 · 连住3晚 · 免费停车", budget: "¥250-400/晚", detail: "订房确认：免费停车够7座车（古城内停车难，选古城外/才村带车位民宿）、电梯、可做饭、3间独立卧室、可加婴儿床围。", gmap: "大理古城 民宿" },
+      { name: "大理古城", lat: 25.700, lng: 100.170, type: 'spot', time: '14:30', desc: "五华楼 · 人民路/复兴路 · 免费", budget: "免费", detail: "午睡后逛古城最舒服：五华楼登高、人民路小店、复兴路小吃；白族烤乳扇、破酥粑粑给宝宝选不辣款。⚠️ 大理海拔2000m紫外线强，防晒霜+宽檐帽。", pay: {"wechat": 1, "alipay": 1}, xhsKeyword: "大理古城 攻略", dianpingKeyword: "大理古城", gmap: "大理古城" },
+      { name: "白族特色晚餐", lat: 25.700, lng: 100.170, type: 'food', time: '18:30', desc: "酸辣鱼/白族生皮(慎点)/海菜花", budget: "¥50-70/人", detail: "推荐：段公子、益恒饭店（老字号）；白族生皮是生猪肉，给宝宝/老人别点，点砂锅鱼、乳扇。", pay: {"wechat": 1, "alipay": 1}, xhsKeyword: "大理 白族菜 推荐", dianpingKeyword: "益恒饭店 大理", gmap: "益恒饭店 大理" }
+    ]
+  },
+  {
+    id: 2, label: 'D2 周二', date: '8月11日 · 洱海西线', title: '喜洲古镇 · 海舌公园', color: '#0d9488',
+    locations: [
+      { name: "龙龛码头/才村码头", lat: 25.690, lng: 100.190, type: 'spot', time: '07:30', desc: "洱海日出 · 生态廊道", budget: "免费", detail: "想看日出 6:40 前到；宝宝起不来就 9 点后玩。⚠️ 生态廊道不能开车，步行/租自行车或电瓶车（廊道口有电瓶车¥15/人）。", gmap: "龙龛码头 大理" },
+      { name: "喜洲古镇", lat: 25.855, lng: 100.115, type: 'spot', time: '10:00', desc: "白族建筑 · 喜洲粑粑", budget: "免费", detail: "喜洲粑粑（破酥/甜咸两种）趁热吃；转角楼拍照人多；古镇石路推车注意颠簸。", pay: {"wechat": 1, "alipay": 1}, xhsKeyword: "喜洲古镇 攻略", dianpingKeyword: "喜洲古镇", gmap: "喜洲古镇 大理" },
+      { name: "海舌公园", lat: 25.860, lng: 100.120, type: 'spot', time: '11:30', desc: "洱海伸出的半岛 · 免费", budget: "免费", detail: "公园免费，门口电瓶车¥10/人往返；树荫多适合推车；给宝宝带伞。", gmap: "海舌公园 大理" },
+      { name: "周城扎染（可选）", lat: 25.900, lng: 100.100, type: 'spot', time: '13:30', desc: "白族扎染体验", budget: "体验¥30-60/人", detail: "带娃可选：看染布晾晒、买扎染围巾/桌布做伴手礼；时间紧可砍。", pay: {"wechat": 1, "alipay": 1}, xhsKeyword: "周城 扎染 体验", gmap: "周城 大理" },
+      { name: "回民宿午睡", lat: 25.700, lng: 100.170, type: 'hotel', time: '14:30', desc: "14:30-16:30 纪律", budget: "—", gmap: "大理古城" },
+      { name: "洱海生态廊道傍晚散步", lat: 25.690, lng: 100.190, type: 'spot', time: '17:00', desc: "日落 + 湖风", budget: "免费", detail: "傍晚廊道人少凉快，推车遛娃，看苍山日落。", gmap: "洱海生态廊道 大理" }
+    ]
+  },
+  {
+    id: 3, label: 'D3 周三', date: '8月12日 · 苍山+三塔', title: '苍山索道 · 崇圣寺三塔', color: '#0284c7',
+    locations: [
+      { name: "苍山·感通索道", lat: 25.660, lng: 100.140, type: 'spot', time: '09:00', desc: "感通寺→清碧溪 · 中索道", budget: "往返约¥100/人", detail: "带娃选感通索道（中索道，海拔适中）不选洗马潭大索道（4,000m+，8月多雨雾且宝宝高反风险）；索道站停车¥10；山上凉，给宝宝带外套。", pay: {"wechat": 1, "alipay": 1}, xhsKeyword: "苍山 感通索道 攻略", dianpingKeyword: "感通索道", gmap: "感通索道 大理" },
+      { name: "崇圣寺三塔", lat: 25.710, lng: 100.150, type: 'spot', time: '12:30', desc: "大理地标 · 倒影池", budget: "全价¥75 · 60-69岁半价", detail: "倒影池拍三塔倒影；宝宝免票；园内电瓶车¥25/人可选（老人省脚力）。", pay: {"wechat": 1, "alipay": 1}, xhsKeyword: "崇圣寺三塔 攻略", dianpingKeyword: "崇圣寺三塔", gmap: "崇圣寺三塔 大理" },
+      { name: "回民宿午睡", lat: 25.700, lng: 100.170, type: 'hotel', time: '14:30', desc: "14:30-16:30 纪律", budget: "—", gmap: "大理古城" },
+      { name: "双廊古镇（傍晚）", lat: 25.890, lng: 100.220, type: 'spot', time: '16:30', desc: "洱海东线 · 南诏风情岛", budget: "免费 · 停车¥20/次", detail: "古城→双廊约1h；⚠️ 双廊旺季停车难，停古镇外停车场（¥20左右）；海地生活白椅子拍照排队久，可略。", pay: {"wechat": 1, "alipay": 1}, xhsKeyword: "双廊古镇 攻略", dianpingKeyword: "双廊古镇", gmap: "双廊古镇 大理" },
+      { name: "双廊晚餐·洱海鱼", lat: 25.890, lng: 100.220, type: 'food', time: '18:30', desc: "砂锅鱼/酸辣鱼", budget: "¥60-80/人", detail: "双廊临海餐馆看日落吃饭；给宝宝点清蒸/不辣鱼汤拌饭。", pay: {"wechat": 1, "alipay": 1}, gmap: "双廊古镇 大理" }
+    ]
+  },
+  {
+    id: 4, label: 'D4 周四', date: '8月13日 · 大理→攀枝花', title: '金沙江峡谷 · 5h转场', color: '#2563eb',
+    locations: [
+      { name: "大理古城伴手礼采购", lat: 25.700, lng: 100.170, type: 'spot', time: '09:30', desc: "鲜花饼/乳扇/菌干", budget: "¥150-300", detail: "出发前古城补货：嘉华/潘祥记鲜花饼、乳扇、菌干；放后备箱，到家送人。", pay: {"wechat": 1, "alipay": 1}, xhsKeyword: "大理 伴手礼 鲜花饼", gmap: "大理古城" },
+      { name: "大理→攀枝花", lat: 26.100, lng: 101.700, type: 'transport', time: '11:00', desc: "约300km · 纯开5-5.5h · 山路峡谷", budget: "油费/过路费见总览", detail: "走大永高速/G348 方向（经永仁）；⚠️ 金沙江峡谷段山路+雨季（8月）注意落石塌方，出发前看高德实时路况，暴雨果断等；中途服务区休息2次；宝宝午睡在车上（13:30-16:00）。", gmap: "攀枝花 四川" },
+      { name: "攀枝花住宿", lat: 26.585, lng: 101.718, type: 'hotel', time: '17:00', desc: "市区3居室 · 免费停车", budget: "¥200-300/晚", detail: "攀枝花是钢城，住宿选炳草岗/仁和区近高速口；明天一早出发西昌。", gmap: "攀枝花 四川" },
+      { name: "攀枝花晚餐·盐边菜", lat: 26.585, lng: 101.718, type: 'food', time: '18:30', desc: "盐边牛肉/油底肉", budget: "¥40-60/人", detail: "攀枝花特色盐边菜（盐边牛肉、油底肉）；给宝宝清淡款。", pay: {"wechat": 1, "alipay": 1}, xhsKeyword: "攀枝花 盐边菜", gmap: "攀枝花 四川" }
+    ]
+  },
+  {
+    id: 5, label: 'D5 周五', date: '8月14日 · 攀枝花→西昌', title: '邛海湿地 · 西昌烧烤', color: '#059669',
+    locations: [
+      { name: "攀枝花→西昌", lat: 26.585, lng: 101.718, type: 'transport', time: '08:30', desc: "G5京昆高速 · 约160km 纯开2.5h", budget: "油费/过路费见总览", detail: "全程高速好走；11:00 前到西昌。", gmap: "西昌 四川" },
+      { name: "邛海湿地公园", lat: 27.860, lng: 102.300, type: 'spot', time: '11:30', desc: "高原湖泊 · 免费湿地", budget: "免费", detail: "邛海湿地公园免费；环湖步道推车友好；下午阳光强，树荫下休息，给宝宝物理防晒。", pay: {"wechat": 1, "alipay": 1}, xhsKeyword: "邛海湿地公园 攻略", gmap: "邛海湿地公园 西昌" },
+      { name: "西昌烧烤（晚餐）", lat: 27.880, lng: 102.270, type: 'food', time: '18:00', desc: "西昌火盆烧烤 · 小渔村", budget: "¥50-70/人", detail: "西昌烧烤是招牌（邛海小渔村烧烤）；给宝宝点烤土豆/蒸蛋/米饭，不辣；⚠️ 火盆烧烤油烟大，注意通风。", pay: {"wechat": 1, "alipay": 1}, xhsKeyword: "西昌烧烤 推荐", dianpingKeyword: "西昌烧烤", gmap: "西昌 烧烤" },
+      { name: "西昌住宿", lat: 27.880, lng: 102.270, type: 'hotel', time: '20:00', desc: "邛海/市区3居室 · 免费停车", budget: "¥250-350/晚", detail: "住邛海边或市区；明天 5.5h 车程，早休息。", gmap: "西昌 四川" }
+    ]
+  },
+  {
+    id: 6, label: 'D6 周六', date: '8月15日 · 西昌→乐山', title: '雅西高速 · 桥隧壮景', color: '#b45309',
+    locations: [
+      { name: "西昌出发", lat: 27.880, lng: 102.270, type: 'transport', time: '08:00', desc: "G5京昆（雅西段）→成乐高速 · 约410km 纯开5.5h", budget: "油费/过路费见总览", detail: "雅西高速（石棉-汉源段）桥隧多、海拔高、雨季云雾大：雨天降速、开雾灯、加大车距；满油出发；途中服务区休息2次（石棉服务区午餐）。", gmap: "乐山 四川" },
+      { name: "乐山住宿（张公桥附近）", lat: 29.580, lng: 103.740, type: 'hotel', time: '14:00', desc: "3居室 · 免费停车", budget: "¥200-300/晚", detail: "住张公桥美食街附近，晚餐步行解决。", gmap: "张公桥 乐山" },
+      { name: "乐山大佛·远眺（可选）", lat: 29.545, lng: 103.770, type: 'spot', time: '15:30', desc: "远眺大佛 · 夜游可选", budget: "远眺免费 · 景区¥80/人", detail: "下午到乐山可选：岷江边远眺大佛，或夜游三江（灯光）；带娃排队看大佛栈道人多，远眺即可。", pay: {"wechat": 1, "alipay": 1}, xhsKeyword: "乐山 夜游三江", gmap: "乐山大佛 乐山" },
+      { name: "张公桥美食街（晚餐）", lat: 29.580, lng: 103.740, type: 'food', time: '18:00', desc: "跷脚牛肉/甜皮鸭/豆腐脑", budget: "¥40-60/人", detail: "乐山是美食之都：跷脚牛肉、甜皮鸭、豆腐脑、钵钵鸡；给宝宝点不辣牛肉汤泡饭。", pay: {"wechat": 1, "alipay": 1}, xhsKeyword: "乐山 张公桥 美食", dianpingKeyword: "张公桥美食街", gmap: "张公桥 乐山" }
+    ]
+  },
+  {
+    id: 7, label: 'D7 周日', date: '8月16日 · 乐山→荣昌', title: '270km 回家 · 中午到家', color: '#475569',
+    locations: [
+      { name: "乐山出发", lat: 29.580, lng: 103.740, type: 'transport', time: '08:30', desc: "G93成渝环线 · 约270km 纯开3.5h", budget: "油费/过路费见总览", detail: "经自贡→内江→隆昌→荣昌；服务区休息1次；12:30-13:00 抵荣昌，回家休整。", gmap: "荣昌区 重庆" },
+      { name: "抵荣昌·回家", lat: 29.400, lng: 105.600, type: 'transport', time: '13:00', desc: "行程结束", budget: "—", detail: "到家先补觉，宝宝作息调回；大理买的鲜花饼分装送人。", gmap: "荣昌区 重庆" }
+    ]
+  }
+];
+
+// ══════════ OVERVIEW ══════════
+
+function overviewContent() {
+  return `
+<div class="hero"><h1>大理 · 西昌返程 7天 · 带娃版</h1><p class="subtitle">5大1小（15个月婴儿）· 7座车 · 昆明→大理→攀枝花→西昌→乐山→荣昌 · 全程不走回头路</p></div>
+<div class="info-grid">
+  <div class="info-card"><div class="label">住宿</div><div class="value">大理古城/才村 3晚 → 攀枝花 1晚 → 西昌 1晚 → 乐山 1晚（共6晚）</div></div>
+  <div class="info-card"><div class="label">路线</div><div class="value">自驾7座车：昆明→大理（G56）→攀枝花（大永/峡谷路）→西昌（G5京昆）→乐山（雅西+成乐）→荣昌（G93），全程不走回头路</div></div>
+  <div class="info-card"><div class="label">支付</div><div class="value">微信/支付宝为主，高速/停车备现金 ¥300–500</div></div>
+  <div class="info-card"><div class="label">预估费用</div><div class="value">全家5大1小 ≈ ¥7,000（区间 ¥6,500-7,800）</div></div>
+</div>
+<div class="section-head">行程概览</div>
+<div class="day-list">${DAYS.slice(1).map(d=>`<div class="card" onclick="go(${d.id})"><div class="name"><span class="dot" style="background:${d.color}"></span>${d.label} · ${d.title}</div><div class="desc">${d.date}</div></div>`).join('')}</div>
+<div class="section-head">费用估算（全家 5大1小）</div>
+<div class="card" style="cursor:default;">
+  <table class="budget-table">
+    <tr><th>项目</th><th>明细</th><th class="num">全家费用</th></tr>
+    <tr><td>油费</td><td>约1,300km（大理市内100+大理→攀枝花300+攀枝花→西昌160+西昌→乐山410+乐山→荣昌270+市内60），满载+空调+山区11-12L/100km</td><td class="num">¥1,150-1,300</td></tr>    <tr><td>过路费</td><td>全程高速为主（G5/G93），雅西段费率略高</td><td class="num">¥700-800</td></tr>    <tr><td>住宿 6晚</td><td>大理3晚 ¥750-1,200 + 攀枝花1晚 ¥200-300 + 西昌1晚 ¥250-350 + 乐山1晚 ¥200-300</td><td class="num">¥1,400-2,150</td></tr>    <tr><td>餐饮 7天</td><td>白族菜/西昌烧烤/乐山小吃，另计宝宝辅食¥100-200</td><td class="num">¥1,900-2,500</td></tr>    <tr><td>门票</td><td>苍山感通索道约¥100×5 + 崇圣寺三塔¥75×3+37.5×2 + 双廊/喜洲/邛海免费</td><td class="num">¥600-750</td></tr>    <tr><td>停车杂费</td><td>大理古城¥10-20/次、双廊¥20、索道¥10、民宿0-20/天</td><td class="num">¥200-300</td></tr>    <tr><td>伴手礼</td><td>鲜花饼、乳扇、菌干（大理买）</td><td class="num">¥150-300</td></tr>    <tr><td>机动</td><td>雨具、自驾险、服务区消费</td><td class="num">¥200-300</td></tr>    <tr class="total"><td>合计</td><td>大理3天半经典玩法+西昌返程环线；不走回头路，比原路返回多约¥300油费</td><td class="num">≈ ¥7,000</td></tr>
+  </table>
+</div>
+<div class="section-head">支付提醒</div>
+<div class="pay-summary"><h4>✅ 出发前订好</h4><div class="ok-text">大理民宿3晚提前确认（免费停车够7座车/电梯/可做饭/3卧室）；崇圣寺三塔、苍山索道线上购票；车辆保养+自驾险；8月雨季出发前看高德路况。</div></div>
+<div class="pay-summary"><h4>⚠️ 现场注意</h4><div class="warn">大理海拔2000m紫外线强，全天防晒；洱海生态廊道禁车；大理→攀枝花金沙江峡谷段雨季防落石；雅西高速桥隧多雨天降速；每天13:30-16:00午睡纪律（转场日午睡在车上）。</div></div>
+<div class="section-head">带娃/长辈速记</div>
+<ul class="notes">
+<li>🍼 15个月婴儿：安全座椅反向、尿不湿、奶粉余量、物理防晒；苍山选感通索道不选洗马潭（4000m高反风险）；白族生皮/生肉不给宝宝。</li><li>👴 老人：崇圣寺三塔60-69岁半价¥37.5、70+免票（带身份证）；苍山索道老人量力而行；石板路防滑鞋。</li><li>⛽ 昆明满油出发；大理出发前满油；西昌满油再走雅西高速；山区服务区油价偏高。</li><li>🌊 洱海生态廊道全程禁机动车，自驾车停村口停车场；双廊停车紧张停镇外。</li><li>🍖 西昌火盆烧烤必吃（小渔村）；乐山张公桥一条街解决晚餐（跷脚牛肉/甜皮鸭）。</li><li>🌦️ 8月雨季：大理阵雨多备雨具，雅西高速云雾大，荣昌段闷热换短袖。</li></ul>
+<div class="section-head">图例</div>
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--tint-red)"></div>餐厅</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--tint-blue)"></div>景点</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--tint-orange)"></div>酒店</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--text-tertiary)"></div>交通/自驾</div>
+</div>`;
+}
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  ENGINE — 官方模板引擎（仅按国内场景微调瓦片与查询后缀）       ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+const map = L.map('map', { center: [HOTEL.lat || 26.5, HOTEL.lng || 105.4], zoom: 10, zoomControl: false, attributionControl: true });
+L.control.zoom({ position: 'topright' }).addTo(map);
+L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
+  maxZoom: 18, subdomains: ['1','2','3','4'], attribution: '&copy; 高德地图'
+}).addTo(map);
+
+/* ── Geolocation ── */
+const LocateControl = L.Control.extend({
+  options: { position: 'bottomright' },
+  onAdd() {
+    const btn = L.DomUtil.create('button', 'locate-btn');
+    btn.innerHTML = '📍';
+    btn.title = '我的位置';
+    L.DomEvent.disableClickPropagation(btn);
+    btn.addEventListener('click', () => {
+      btn.classList.add('active');
+      map.locate({ setView: true, maxZoom: 15 });
+    });
+    this._btn = btn;
+    return btn;
+  }
+});
+new LocateControl().addTo(map);
+let locMarker, locCircle;
+map.on('locationfound', e => {
+  const r = e.accuracy / 2;
+  if (locMarker) { locMarker.setLatLng(e.latlng); locCircle.setLatLng(e.latlng).setRadius(r); }
+  else {
+    locMarker = L.marker(e.latlng, {
+      icon: L.divIcon({ className:'', html:'<div style="width:14px;height:14px;border-radius:50%;background:#007aff;border:2.5px solid #fff;box-shadow:0 0 6px rgba(0,122,255,.5)"></div><div class="loc-pulse" style="position:absolute;top:0;left:0"></div>', iconSize:[14,14], iconAnchor:[7,7] }),
+      zIndexOffset: 2000
+    }).addTo(map);
+    locCircle = L.circle(e.latlng, { radius: r, color: '#007aff', fillColor: '#007aff', fillOpacity: .08, weight: 1 }).addTo(map);
+  }
+});
+map.on('locationerror', () => {});
+
+function icon(color, emoji) {
+  return L.divIcon({ className: '', html: `<div style="width:28px;height:28px;border-radius:50%;background:${color};border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.18)">${emoji||''}</div>`, iconSize: [28,28], iconAnchor: [14,14], popupAnchor: [0,-16] });
+}
+
+if (HOTEL.lat) L.marker([HOTEL.lat, HOTEL.lng], { icon: icon('#ff9500','🏨'), zIndexOffset: 1000 }).addTo(map).bindPopup(`<b>${HOTEL.name}</b>`);
+
+let markers = [], polylines = [];
+const emojis = { food:'🍽️', spot:'📍', hotel:'🏨', transport:'🚃', drink:'🍺' };
+
+function clearMap() { markers.forEach(m=>map.removeLayer(m)); polylines.forEach(p=>map.removeLayer(p)); markers=[]; polylines=[]; }
+
+function showDay(idx) {
+  clearMap();
+  if (idx === 0) {
+    const pts = [];
+    DAYS.forEach(d => d.locations.forEach(l => { if(l.lat) pts.push([l.lat,l.lng]); }));
+    if(pts.length) map.fitBounds(pts, {padding:[30,30]});
+    DAYS.slice(1).forEach(d => {
+      d.locations.filter(l=>l.time!=='—').forEach(l => {
+        const m = L.circleMarker([l.lat,l.lng], { radius:4, fillColor:d.color, color:'#fff', weight:1.5, fillOpacity:.9 }).addTo(map).bindPopup(`<b>${l.name}</b><br><span style="color:#86868b">${d.label}</span>`);
+        markers.push(m);
+      });
+    });
+    return;
+  }
+  const day = DAYS.find(d=>d.id===idx);
+  if(!day) return;
+  const coords = [];
+  day.locations.forEach(l => {
+    if(!l.lat) return;
+    const m = L.marker([l.lat,l.lng], { icon: icon(day.color, emojis[l.type]||'📌') }).addTo(map);
+    const gmapQ = l.gmap||encodeURIComponent(l.name+' 云南');
+    m.bindPopup(`<b>${l.name}</b>${l.time!=='—'?'<br><span style="color:#86868b">'+l.time+'</span>':''}<br>${l.desc}${l.budget?'<br><span style="color:#ff9500">'+l.budget+'</span>':''}<br><a href="#" onclick="event.preventDefault();openAS('${l.name.replace(/'/g,"\\'")}',${l.lat},${l.lng},'${gmapQ}')">📍 导航</a>${l.xhs?' · <a href="'+l.xhs+'" target="_blank">📕 小红书</a>':''}`);
+    markers.push(m);
+    if(l.time!=='—') coords.push([l.lat,l.lng]);
+  });
+  if(coords.length>1) { const pl = L.polyline(coords, { color:day.color, weight:2.5, opacity:.5, dashArray:'6,5' }).addTo(map); polylines.push(pl); }
+  if(coords.length) map.fitBounds(coords, { padding:[40,40], maxZoom:14 });
+}
+
+// ══════════ RENDER ══════════
+function payChips(pay) {
+  if(!pay) return '';
+  let h = '<div class="pays">';
+  const m = { cash:'💴', card:'💳', suica:'Suica', paypay:'PayPay', alipay:'支付宝', wechat:'微信' };
+  for(const [k,label] of Object.entries(m)) {
+    if(pay[k]!==undefined) { const c = pay[k]===1?'ok':pay[k]===0.5?'idk':'no'; h += `<span class="pay ${c}">${label}</span>`; }
+  }
+  return h+'</div>';
+}
+
+// ── 运行环境检测：在第三方 App 的 WebView 里，自定义 scheme 基本会被拦截 ──
+const IN_APP_WEBVIEW = (() => {
+  const ua = (navigator.userAgent || '').toLowerCase();
+  return /micromessenger|xhs|xhsdiscover|discover\/|tiktok|aweme|weibo|qq\/|qqbrowser|alipayclient|dingtalk|lark|feishu|ucbrowser|baiduboxapp|toutiao|newsarticle/.test(ua);
+})();
+
+function xhsKeyword(loc) {
+  if(loc.xhsKeyword) return loc.xhsKeyword.trim();
+  return (loc.name||'').replace(/⭐.*$/g,'').replace(/（.*?）/g,'').replace(/\(.*?\)/g,'').replace(/\s+/g,' ').trim();
+}
+function xhsAppUrl(loc) { return `xhsdiscover://search/result?keyword=${encodeURIComponent(xhsKeyword(loc))}&target_search=notes&source=deeplink`; }
+function xhsWebUrl(loc) { return `https://www.xiaohongshu.com/search_result?keyword=${encodeURIComponent(xhsKeyword(loc))}&source=web_explore_feed`; }
+
+function dpKeyword(loc) {
+  if(loc.dianpingKeyword) return loc.dianpingKeyword.trim();
+  return (loc.name||'').replace(/⭐.*$/g,'').replace(/（.*?）/g,'').replace(/\(.*?\)/g,'').replace(/\s+/g,' ').trim();
+}
+function dpAppUrl(loc) { return `dianping://searchshoplist?keyword=${encodeURIComponent(dpKeyword(loc))}`; }
+function dpWebUrl(loc) { return `https://m.dianping.com/searchshop?keyword=${encodeURIComponent(dpKeyword(loc))}`; }
+
+window._extLocs = {};
+DAYS.forEach(d => d.locations.forEach(l => { window._extLocs[`${d.id}::${l.name}`] = l; }));
+window._xhsLocs = window._extLocs;
+
+function openExt(key, kind) {
+  const loc = window._extLocs[key]; if(!loc) return false;
+  if (IN_APP_WEBVIEW) {
+    window.location.href = kind==='dp' ? dpWebUrl(loc) : xhsWebUrl(loc);
+  } else {
+    window.location.href = kind==='dp' ? dpAppUrl(loc) : xhsAppUrl(loc);
+  }
+  return false;
+}
+function openXhs(key) { return openExt(key, 'xhs'); }
+function openDp(key)  { return openExt(key, 'dp'); }
+
+function locCard(loc, dayIdx, i) {
+  const dot = loc.type==='food'?'food':loc.type==='spot'?'spot':loc.type==='drink'?'drink':loc.type==='hotel'?'hotel':'transport';
+  const bdg = loc.type==='food'?'<span class="badge food">餐</span>':loc.type==='spot'?'<span class="badge spot">景</span>':loc.type==='drink'?'<span class="badge drink">饮</span>':'';
+  const uid = `d${dayIdx}-${i}`;
+  const locKey = `${dayIdx}::${loc.name}`;
+  const gmapQ = loc.gmap||encodeURIComponent(loc.name+' 云南');
+  let lnk = `<button class="btn nav" onclick="openAS('${loc.name.replace(/'/g,"\\'")}',${loc.lat},${loc.lng},'${gmapQ}')">📍 导航</button>`;
+  if(loc.xhs||loc.xhsKeyword) {
+    const xhsHref = IN_APP_WEBVIEW ? xhsWebUrl(loc) : xhsAppUrl(loc);
+    const xhsLabel = IN_APP_WEBVIEW ? '📕 小红书' : '📕 小红书 App';
+    lnk += `<a href="${xhsHref}" onclick="return openXhs('${locKey.replace(/'/g,"\\'")}')" class="btn xhs">${xhsLabel}</a>`;
+  }
+  const dpEnabled = loc.dianping !== false &&
+    (loc.dianping || loc.dianpingKeyword || loc.type==='food' || loc.type==='drink');
+  if(dpEnabled) {
+    const dpHref = IN_APP_WEBVIEW ? dpWebUrl(loc) : dpAppUrl(loc);
+    const dpLabel = IN_APP_WEBVIEW ? '🍜 大众点评' : '🍜 大众点评 App';
+    lnk += `<a href="${dpHref}" onclick="return openDp('${locKey.replace(/'/g,"\\'")}')" class="btn dp">${dpLabel}</a>`;
+  }
+  if(loc.reserve) lnk += `<a href="${loc.reserve}" target="_blank" class="btn rsv">📅 预约</a>`;
+  return `<div class="tl-item"><div class="tl-dot ${dot}"></div><div class="card" onclick="if(!event.target.closest('.btn,.links'))toggle('${uid}')"><div class="time">${loc.time!=='—'?loc.time:'备选'}</div><div class="name">${bdg} ${loc.name}</div><div class="desc">${loc.desc}</div>${loc.budget?'<div class="budget">'+loc.budget+'</div>':''}${payChips(loc.pay)}<div class="links">${lnk}</div>${loc.detail?'<div class="details" id="'+uid+'">'+loc.detail.replace(/\n/g,'<br>')+'</div>':''}</div></div>`;
+}
+
+function renderDay(idx) {
+  const d = DAYS.find(x=>x.id===idx); if(!d) return '';
+  const main = d.locations.filter(l=>l.time!=='—');
+  const alt = d.locations.filter(l=>l.time==='—');
+  let h = `<div class="day-head"><h2>${d.title}</h2><p>${d.date}</p></div>`;
+  if(main.length) { h += '<div class="section-head">行程</div><div class="timeline">'; main.forEach((l,i) => h += locCard(l, idx, i)); h += '</div>'; }
+  if(alt.length) { h += '<div class="section-head">备选</div><div class="timeline">'; alt.forEach((l,i) => h += locCard(l, idx, i + main.length)); h += '</div>'; }
+  return h;
+}
+
+// ══════════ NAV ══════════
+let cur = 0;
+const tabsEl = document.getElementById('tabs');
+const contentEl = document.getElementById('content');
+
+DAYS.forEach(d => {
+  const btn = document.createElement('button');
+  btn.className = 'tab' + (d.id===0?' active':'');
+  btn.dataset.day = d.id;
+  btn.textContent = d.label;
+  tabsEl.appendChild(btn);
+});
+
+function go(idx) {
+  cur = idx;
+  tabsEl.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', +t.dataset.day===idx));
+  contentEl.innerHTML = idx===0 ? overviewContent() : renderDay(idx);
+  showDay(idx);
+  contentEl.scrollTo({top:0});
+  const tab = tabsEl.querySelector(`[data-day="${idx}"]`);
+  if(tab) tab.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+}
+
+function toggle(id) { const el=document.getElementById(id); if(el) el.classList.toggle('closed'); }
+
+tabsEl.addEventListener('click', e => { const t=e.target.closest('.tab'); if(t) go(+t.dataset.day); });
+
+go(0);
+
+/* ── Action Sheet for Navigation ── */
+const asOverlay = document.createElement('div');
+asOverlay.className = 'as-overlay';
+asOverlay.innerHTML = `<div class="as-sheet">
+  <div class="as-group" id="as-opts"></div>
+  <div class="as-group"><button class="as-item as-cancel" onclick="closeAS()">取消</button></div>
+</div>`;
+document.body.appendChild(asOverlay);
+asOverlay.addEventListener('click', e => { if (e.target === asOverlay) closeAS(); });
+
+const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+function amapAppUrl(name, lat, lng) {
+  const scheme = IS_IOS ? 'iosamap' : 'androidamap';
+  return `${scheme}://viewMap?sourceApplication=trip&poiname=${encodeURIComponent(name)}&lat=${lat}&lon=${lng}&dev=0`;
+}
+function amapWebUrl(name, lat, lng) {
+  return `https://uri.amap.com/marker?position=${lng},${lat}&name=${encodeURIComponent(name)}&src=trip&coordinate=wgs84&callnative=1`;
+}
+function openAmap(name, lat, lng) {
+  if (IN_APP_WEBVIEW) { window.open(amapWebUrl(name, lat, lng)); return; }
+  window.location.href = amapAppUrl(name, lat, lng);
+}
+
+function openAS(name, lat, lng, gmap) {
+  const q = gmap || encodeURIComponent(name + ' 云南');
+  const encName = encodeURIComponent(name);
+  const safeName = name.replace(/'/g,"\\'");
+  // WebView 内 maps:// 通常被拦截，改用 https Apple Maps URL —— iOS 系统会自动拉起 Apple Maps
+  const appleUrl = IN_APP_WEBVIEW
+    ? `https://maps.apple.com/?q=${lat},${lng}&ll=${lat},${lng}&name=${encName}`
+    : `maps://maps.apple.com/?q=${lat},${lng}&name=${encName}`;
+  const googleUrl = `https://www.google.com/maps/search/?api=1&query=${q}`;
+  document.getElementById('as-opts').innerHTML =
+    `<button class="as-item" onclick="window.open('${appleUrl}');closeAS()">🍎 Apple Maps</button>` +
+    `<button class="as-item" onclick="window.open('${googleUrl}');closeAS()">🗺️ Google Maps</button>` +
+    `<button class="as-item" onclick="openAmap('${safeName}',${lat},${lng});closeAS()">🧭 高德地图 App</button>`;
+  asOverlay.classList.add('show');
+}
+function closeAS() { asOverlay.classList.remove('show'); }
+</script>
+</body>
+</html>
