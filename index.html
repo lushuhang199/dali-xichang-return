@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>大理+西昌返程 7天 · 5大1小（昆明出发 → 大理 → 西昌 → 荣昌）</title>
-<meta name="description" content="全家5大1小（15个月婴儿）+7座车：8/10上午昆明→大理，大理玩3天半（洱海西线/苍山/双廊），8/13经攀枝花→西昌→乐山返程，不走回头路，8/16（周日）抵荣昌。含带娃纪律、停车、预算明细，全家约7,000元。">
+<title>大理 6天 · 5大1小（昆明→大理→攀枝花→宜宾→荣昌，避开雅西）</title>
+<meta name="description" content="全家5大1小（15个月婴儿）+7座车：8/10上午昆明→大理，大理玩3天（洱海西线/苍山/双廊），8/13经攀枝花沿金沙江（G4216沿江高速）→宜宾→荣昌，完全避开雨季高危的雅西高速，8/15（周六）抵荣昌。含带娃纪律、停车、预算明细，全家约6,000元。">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -287,33 +287,24 @@ const DAYS = [
     locations: [
       { name: "大理古城伴手礼采购", lat: 25.700, lng: 100.170, type: 'spot', time: '09:30', desc: "鲜花饼/乳扇/菌干", budget: "¥150-300", detail: "出发前古城补货：嘉华/潘祥记鲜花饼、乳扇、菌干；放后备箱，到家送人。", pay: {"wechat": 1, "alipay": 1}, xhsKeyword: "大理 伴手礼 鲜花饼", gmap: "大理古城" },
       { name: "大理→攀枝花", lat: 26.100, lng: 101.700, type: 'transport', time: '11:00', desc: "约300km · 纯开5-5.5h · 山路峡谷", budget: "油费/过路费见总览", detail: "走大永高速/G348 方向（经永仁）；⚠️ 金沙江峡谷段山路+雨季（8月）注意落石塌方，出发前看高德实时路况，暴雨果断等；中途服务区休息2次；宝宝午睡在车上（13:30-16:00）。", gmap: "攀枝花 四川" },
-      { name: "攀枝花住宿", lat: 26.585, lng: 101.718, type: 'hotel', time: '17:00', desc: "市区3居室 · 免费停车", budget: "¥200-300/晚", detail: "攀枝花是钢城，住宿选炳草岗/仁和区近高速口；明天一早出发西昌。", gmap: "攀枝花 四川" },
+      { name: "攀枝花住宿", lat: 26.585, lng: 101.718, type: 'hotel', time: '17:00', desc: "市区3居室 · 免费停车", budget: "¥200-300/晚", detail: "攀枝花是钢城，住宿选炳草岗/仁和区近高速口；明天一早出发宜宾（沿江高速）。", gmap: "攀枝花 四川" },
       { name: "攀枝花晚餐·盐边菜", lat: 26.585, lng: 101.718, type: 'food', time: '18:30', desc: "盐边牛肉/油底肉", budget: "¥40-60/人", detail: "攀枝花特色盐边菜（盐边牛肉、油底肉）；给宝宝清淡款。", pay: {"wechat": 1, "alipay": 1}, xhsKeyword: "攀枝花 盐边菜", gmap: "攀枝花 四川" }
     ]
   },
   {
-    id: 5, label: 'D5 周五', date: '8月14日 · 攀枝花→西昌', title: '邛海湿地 · 西昌烧烤', color: '#059669',
+    id: 5, label: 'D5 周五', date: '8月14日 · 攀枝花→宜宾', title: '沿江高速 · 金沙江峡谷', color: '#059669',
     locations: [
-      { name: "攀枝花→西昌", lat: 26.585, lng: 101.718, type: 'transport', time: '08:30', desc: "G5京昆高速 · 约160km 纯开2.5h", budget: "油费/过路费见总览", detail: "全程高速好走；11:00 前到西昌。", gmap: "西昌 四川" },
-      { name: "邛海湿地公园", lat: 27.860, lng: 102.300, type: 'spot', time: '11:30', desc: "高原湖泊 · 免费湿地", budget: "免费", detail: "邛海湿地公园免费；环湖步道推车友好；下午阳光强，树荫下休息，给宝宝物理防晒。", pay: {"wechat": 1, "alipay": 1}, xhsKeyword: "邛海湿地公园 攻略", gmap: "邛海湿地公园 西昌" },
-      { name: "西昌烧烤（晚餐）", lat: 27.880, lng: 102.270, type: 'food', time: '18:00', desc: "西昌火盆烧烤 · 小渔村", budget: "¥50-70/人", detail: "西昌烧烤是招牌（邛海小渔村烧烤）；给宝宝点烤土豆/蒸蛋/米饭，不辣；⚠️ 火盆烧烤油烟大，注意通风。", pay: {"wechat": 1, "alipay": 1}, xhsKeyword: "西昌烧烤 推荐", dianpingKeyword: "西昌烧烤", gmap: "西昌 烧烤" },
-      { name: "西昌住宿", lat: 27.880, lng: 102.270, type: 'hotel', time: '20:00', desc: "邛海/市区3居室 · 免费停车", budget: "¥250-350/晚", detail: "住邛海边或市区；明天 5.5h 车程，早休息。", gmap: "西昌 四川" }
+      { name: "攀枝花→宜宾（G4216沿江高速）", lat: 26.585, lng: 101.718, type: 'transport', time: '08:00', desc: "沿江高速约427km · 纯开5.5-6h · 2026年1月刚全线通车", budget: "油费/过路费见总览", detail: "沿金沙江布设的新高速（设计80km/h，隧道桥梁多限速），完全避开雅西高速雨季高危段；满油出发；服务区休息2次（会东/金阳服务区午餐）；宝宝午睡在车上。", gmap: "宜宾 四川" },
+      { name: "李庄古镇", lat: 28.790, lng: 104.850, type: 'spot', time: '15:00', desc: "万里长江第一古镇 · 白肉", budget: "免费 · 停车¥10", detail: "明清古建筑群+长江边；必吃李庄白肉（薄如纸）、黄粑；石板路推车注意。", pay: {"wechat": 1, "alipay": 1}, xhsKeyword: "李庄古镇 攻略", dianpingKeyword: "李庄古镇", gmap: "李庄古镇 宜宾" },
+      { name: "宜宾住宿（市区/南岸）", lat: 28.750, lng: 104.630, type: 'hotel', time: '18:00', desc: "3居室 · 免费停车", budget: "¥200-300/晚", detail: "住市区近高速口；明早 2h 就到荣昌。", gmap: "宜宾 四川" },
+      { name: "宜宾燃面（晚餐）", lat: 28.750, lng: 104.630, type: 'food', time: '18:30', desc: "宜宾燃面 · 五粮液（可选）", budget: "¥15-25/人", detail: "燃面要点\"一两\"，加醋；给宝宝点清汤抄手；有兴趣可夜游五粮液厂区灯光。", pay: {"wechat": 1, "alipay": 1}, xhsKeyword: "宜宾燃面 推荐", dianpingKeyword: "宜宾燃面", gmap: "宜宾 燃面" }
     ]
   },
   {
-    id: 6, label: 'D6 周六', date: '8月15日 · 西昌→乐山', title: '雅西高速 · 桥隧壮景', color: '#b45309',
+    id: 6, label: 'D6 周六', date: '8月15日 · 宜宾→荣昌', title: '155km 回家 · 中午到家', color: '#475569',
     locations: [
-      { name: "西昌出发", lat: 27.880, lng: 102.270, type: 'transport', time: '08:00', desc: "G5京昆（雅西段）→成乐高速 · 约410km 纯开5.5h", budget: "油费/过路费见总览", detail: "雅西高速（石棉-汉源段）桥隧多、海拔高、雨季云雾大：雨天降速、开雾灯、加大车距；满油出发；途中服务区休息2次（石棉服务区午餐）。", gmap: "乐山 四川" },
-      { name: "乐山住宿（张公桥附近）", lat: 29.580, lng: 103.740, type: 'hotel', time: '14:00', desc: "3居室 · 免费停车", budget: "¥200-300/晚", detail: "住张公桥美食街附近，晚餐步行解决。", gmap: "张公桥 乐山" },
-      { name: "乐山大佛·远眺（可选）", lat: 29.545, lng: 103.770, type: 'spot', time: '15:30', desc: "远眺大佛 · 夜游可选", budget: "远眺免费 · 景区¥80/人", detail: "下午到乐山可选：岷江边远眺大佛，或夜游三江（灯光）；带娃排队看大佛栈道人多，远眺即可。", pay: {"wechat": 1, "alipay": 1}, xhsKeyword: "乐山 夜游三江", gmap: "乐山大佛 乐山" },
-      { name: "张公桥美食街（晚餐）", lat: 29.580, lng: 103.740, type: 'food', time: '18:00', desc: "跷脚牛肉/甜皮鸭/豆腐脑", budget: "¥40-60/人", detail: "乐山是美食之都：跷脚牛肉、甜皮鸭、豆腐脑、钵钵鸡；给宝宝点不辣牛肉汤泡饭。", pay: {"wechat": 1, "alipay": 1}, xhsKeyword: "乐山 张公桥 美食", dianpingKeyword: "张公桥美食街", gmap: "张公桥 乐山" }
-    ]
-  },
-  {
-    id: 7, label: 'D7 周日', date: '8月16日 · 乐山→荣昌', title: '270km 回家 · 中午到家', color: '#475569',
-    locations: [
-      { name: "乐山出发", lat: 29.580, lng: 103.740, type: 'transport', time: '08:30', desc: "G93成渝环线 · 约270km 纯开3.5h", budget: "油费/过路费见总览", detail: "经自贡→内江→隆昌→荣昌；服务区休息1次；12:30-13:00 抵荣昌，回家休整。", gmap: "荣昌区 重庆" },
-      { name: "抵荣昌·回家", lat: 29.400, lng: 105.600, type: 'transport', time: '13:00', desc: "行程结束", budget: "—", detail: "到家先补觉，宝宝作息调回；大理买的鲜花饼分装送人。", gmap: "荣昌区 重庆" }
+      { name: "宜宾出发", lat: 28.750, lng: 104.630, type: 'transport', time: '09:00', desc: "G93成渝环线 · 约155km 纯开2h", budget: "油费/过路费见总览", detail: "经泸州→隆昌→荣昌；服务区休息1次；11:30 抵荣昌，回家正好午饭，下午补觉。", gmap: "荣昌区 重庆" },
+      { name: "抵荣昌·回家", lat: 29.400, lng: 105.600, type: 'transport', time: '11:30', desc: "行程结束", budget: "—", detail: "到家先补觉，宝宝作息调回；大理买的鲜花饼分装送人。", gmap: "荣昌区 重庆" }
     ]
   }
 ];
@@ -322,12 +313,12 @@ const DAYS = [
 
 function overviewContent() {
   return `
-<div class="hero"><h1>大理 · 西昌返程 7天 · 带娃版</h1><p class="subtitle">5大1小（15个月婴儿）· 7座车 · 昆明→大理→攀枝花→西昌→乐山→荣昌 · 全程不走回头路</p></div>
+<div class="hero"><h1>大理 6天 · 带娃版（绕开雅西）</h1><p class="subtitle">5大1小（15个月婴儿）· 7座车 · 昆明→大理→攀枝花→宜宾→荣昌 · 沿江高速金沙江峡谷 · 周六到家</p></div>
 <div class="info-grid">
-  <div class="info-card"><div class="label">住宿</div><div class="value">大理古城/才村 3晚 → 攀枝花 1晚 → 西昌 1晚 → 乐山 1晚（共6晚）</div></div>
-  <div class="info-card"><div class="label">路线</div><div class="value">自驾7座车：昆明→大理（G56）→攀枝花（大永/峡谷路）→西昌（G5京昆）→乐山（雅西+成乐）→荣昌（G93），全程不走回头路</div></div>
+  <div class="info-card"><div class="label">住宿</div><div class="value">大理古城/才村 3晚 → 攀枝花 1晚 → 宜宾 1晚（共5晚）</div></div>
+  <div class="info-card"><div class="label">路线</div><div class="value">自驾7座车：昆明→大理（G56）→攀枝花（大永/峡谷路）→宜宾（G4216沿江高速，金沙江峡谷，避开雅西）→荣昌（G93），全程不走回头路</div></div>
   <div class="info-card"><div class="label">支付</div><div class="value">微信/支付宝为主，高速/停车备现金 ¥300–500</div></div>
-  <div class="info-card"><div class="label">预估费用</div><div class="value">全家5大1小 ≈ ¥7,000（区间 ¥6,500-7,800）</div></div>
+  <div class="info-card"><div class="label">预估费用</div><div class="value">全家5大1小 ≈ ¥6,000（区间 ¥5,300-6,800）</div></div>
 </div>
 <div class="section-head">行程概览</div>
 <div class="day-list">${DAYS.slice(1).map(d=>`<div class="card" onclick="go(${d.id})"><div class="name"><span class="dot" style="background:${d.color}"></span>${d.label} · ${d.title}</div><div class="desc">${d.date}</div></div>`).join('')}</div>
@@ -335,15 +326,15 @@ function overviewContent() {
 <div class="card" style="cursor:default;">
   <table class="budget-table">
     <tr><th>项目</th><th>明细</th><th class="num">全家费用</th></tr>
-    <tr><td>油费</td><td>约1,300km（大理市内100+大理→攀枝花300+攀枝花→西昌160+西昌→乐山410+乐山→荣昌270+市内60），满载+空调+山区11-12L/100km</td><td class="num">¥1,150-1,300</td></tr>    <tr><td>过路费</td><td>全程高速为主（G5/G93），雅西段费率略高</td><td class="num">¥700-800</td></tr>    <tr><td>住宿 6晚</td><td>大理3晚 ¥750-1,200 + 攀枝花1晚 ¥200-300 + 西昌1晚 ¥250-350 + 乐山1晚 ¥200-300</td><td class="num">¥1,400-2,150</td></tr>    <tr><td>餐饮 7天</td><td>白族菜/西昌烧烤/乐山小吃，另计宝宝辅食¥100-200</td><td class="num">¥1,900-2,500</td></tr>    <tr><td>门票</td><td>苍山感通索道约¥100×5 + 崇圣寺三塔¥75×3+37.5×2 + 双廊/喜洲/邛海免费</td><td class="num">¥600-750</td></tr>    <tr><td>停车杂费</td><td>大理古城¥10-20/次、双廊¥20、索道¥10、民宿0-20/天</td><td class="num">¥200-300</td></tr>    <tr><td>伴手礼</td><td>鲜花饼、乳扇、菌干（大理买）</td><td class="num">¥150-300</td></tr>    <tr><td>机动</td><td>雨具、自驾险、服务区消费</td><td class="num">¥200-300</td></tr>    <tr class="total"><td>合计</td><td>大理3天半经典玩法+西昌返程环线；不走回头路，比原路返回多约¥300油费</td><td class="num">≈ ¥7,000</td></tr>
+    <tr><td>油费</td><td>约950km（大理市内100+大理→攀枝花300+攀枝花→宜宾427+宜宾→荣昌155+市内），满载+空调+山区11-12L/100km</td><td class="num">¥850-1,000</td></tr>    <tr><td>过路费</td><td>G4216沿江高速+G93，新高速费率正常</td><td class="num">¥600-700</td></tr>    <tr><td>住宿 5晚</td><td>大理3晚 ¥750-1,200 + 攀枝花1晚 ¥200-300 + 宜宾1晚 ¥200-300</td><td class="num">¥1,150-1,800</td></tr>    <tr><td>餐饮 6天</td><td>白族菜/盐边菜/宜宾燃面，另计宝宝辅食¥100-200</td><td class="num">¥1,600-2,200</td></tr>    <tr><td>门票</td><td>苍山感通索道约¥100×5 + 崇圣寺三塔¥75×3+37.5×2 + 双廊/喜洲/李庄免费</td><td class="num">¥600-750</td></tr>    <tr><td>停车杂费</td><td>大理古城¥10-20/次、双廊¥20、索道¥10、民宿0-20/天</td><td class="num">¥150-250</td></tr>    <tr><td>伴手礼</td><td>鲜花饼、乳扇、菌干（大理买）</td><td class="num">¥150-300</td></tr>    <tr><td>机动</td><td>雨具、自驾险、服务区消费</td><td class="num">¥200-300</td></tr>    <tr class="total"><td>合计</td><td>比原西昌方案省约¥1,000且周六到家；不走回头路，完全避开雅西高速</td><td class="num">≈ ¥6,000</td></tr>
   </table>
 </div>
 <div class="section-head">支付提醒</div>
 <div class="pay-summary"><h4>✅ 出发前订好</h4><div class="ok-text">大理民宿3晚提前确认（免费停车够7座车/电梯/可做饭/3卧室）；崇圣寺三塔、苍山索道线上购票；车辆保养+自驾险；8月雨季出发前看高德路况。</div></div>
-<div class="pay-summary"><h4>⚠️ 现场注意</h4><div class="warn">大理海拔2000m紫外线强，全天防晒；洱海生态廊道禁车；大理→攀枝花金沙江峡谷段雨季防落石；雅西高速桥隧多雨天降速；每天13:30-16:00午睡纪律（转场日午睡在车上）。</div></div>
+<div class="pay-summary"><h4>⚠️ 现场注意</h4><div class="warn">大理海拔2000m紫外线强，全天防晒；洱海生态廊道禁车；大理→攀枝花金沙江峡谷段雨季防落石；G4216沿江高速隧道桥梁多限速80；每天13:30-16:00午睡纪律（转场日午睡在车上）。</div></div>
 <div class="section-head">带娃/长辈速记</div>
 <ul class="notes">
-<li>🍼 15个月婴儿：安全座椅反向、尿不湿、奶粉余量、物理防晒；苍山选感通索道不选洗马潭（4000m高反风险）；白族生皮/生肉不给宝宝。</li><li>👴 老人：崇圣寺三塔60-69岁半价¥37.5、70+免票（带身份证）；苍山索道老人量力而行；石板路防滑鞋。</li><li>⛽ 昆明满油出发；大理出发前满油；西昌满油再走雅西高速；山区服务区油价偏高。</li><li>🌊 洱海生态廊道全程禁机动车，自驾车停村口停车场；双廊停车紧张停镇外。</li><li>🍖 西昌火盆烧烤必吃（小渔村）；乐山张公桥一条街解决晚餐（跷脚牛肉/甜皮鸭）。</li><li>🌦️ 8月雨季：大理阵雨多备雨具，雅西高速云雾大，荣昌段闷热换短袖。</li></ul>
+<li>🍼 15个月婴儿：安全座椅反向、尿不湿、奶粉余量、物理防晒；苍山选感通索道不选洗马潭（4000m高反风险）；白族生皮/生肉不给宝宝。</li><li>👴 老人：崇圣寺三塔60-69岁半价¥37.5、70+免票（带身份证）；苍山索道老人量力而行；石板路防滑鞋。</li><li>⛽ 昆明满油出发；大理出发前满油；攀枝花满油再走沿江高速；山区服务区油价偏高。</li><li>🌊 洱海生态廊道全程禁机动车，自驾车停村口停车场；双廊停车紧张停镇外。</li><li>🏛️ 宜宾李庄古镇免费（万里长江第一古镇）：李庄白肉+黄粑必吃；宜宾燃面早餐。</li><li>🌦️ 8月雨季：大理阵雨多备雨具；G4216新高速刚通车一年，服务区部分未完善，出发前加满油。</li></ul>
 <div class="section-head">图例</div>
 <div class="legend">
   <div class="legend-item"><div class="legend-dot" style="background:var(--tint-red)"></div>餐厅</div>
